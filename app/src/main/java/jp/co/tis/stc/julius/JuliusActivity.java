@@ -26,7 +26,7 @@ public class JuliusActivity extends Activity {
 	private static final String TAG = "Julius JulisuActivity";
 	private static final String ITO = "ito";
 	private static final String CONTINUOUS_JCONF = "/julius/fast-android.jconf";
-//	private static final String GRAMMAR_JCONF = "/julius/demo-grammar-android.jconf";
+///	private static final String GRAMMAR_JCONF = "/julius/demo-grammar-android.jconf";
 	private static final String WAVE_PATH = "/julius/voice.wav";
 	private static final int SAMPLING_RATE = 22050;
 	
@@ -68,9 +68,9 @@ public class JuliusActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		if (isInitialized) {
-			Log.d(ITO, "terminateJulius() ŠJn");
+			Log.d(ITO, "terminateJulius() ï¿½Jï¿½n");
 			terminateJulius();
-			Log.d(ITO, "terminateJulius() I—¹");
+			Log.d(ITO, "terminateJulius() ï¿½Iï¿½ï¿½");
 			isInitialized = false;
 		}
 		super.onDestroy();
@@ -96,22 +96,22 @@ public class JuliusActivity extends Activity {
 		@Override
 		protected Boolean doInBackground(Integer... params) {
 			if (isInitialized) {
-				Log.d(ITO, "terminateJulius() ŠJn");
+				Log.d(ITO, "terminateJulius() ï¿½Jï¿½n");
 				terminateJulius();
-				Log.d(ITO, "terminateJulius() I—¹");
+				Log.d(ITO, "terminateJulius() ï¿½Iï¿½ï¿½");
 			}
 			String conf;
 			Log.d(TAG, "JuliusInitializer:doInBackground:conf is continuous");
 			conf = CONTINUOUS_JCONF;
 
-			Log.d(ITO, "initJulius() ŠJn");
+			Log.d(ITO, "initJulius() ï¿½Jï¿½n");
 			if (initJulius(Environment.getExternalStorageDirectory() + conf)) {
 				Log.d(TAG, "JuliusInitializer:doInBackground:init julius success");
-				Log.d(ITO, "initJulius() I—¹");
+				Log.d(ITO, "initJulius() ï¿½Iï¿½ï¿½");
 				return true;
 			} else {
 				Log.e(TAG, "JuliusInitializer:doInBackground:init julius error");
-				Log.d(ITO, "initJulius() ƒGƒ‰[I—¹");
+				Log.d(ITO, "initJulius() ï¿½Gï¿½ï¿½ï¿½[ï¿½Iï¿½ï¿½");
 				return false;
 			}
 		}
@@ -162,7 +162,7 @@ public class JuliusActivity extends Activity {
 		private final Runnable writeAudioToFile = new Runnable() {
 			@Override
 			public void run() {
-				Log.d(ITO, "ƒtƒ@ƒCƒ‹‘‚«‚İ ŠJn");
+				Log.d(ITO, "ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Jï¿½n");
 				android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 				File recFile = new File(Environment.getExternalStorageDirectory() + WAVE_PATH);
 				FileOutputStream fout = null;
@@ -206,7 +206,7 @@ public class JuliusActivity extends Activity {
 						Log.e(TAG, e.toString());
 					}
 				}
-				Log.d(ITO, "ƒtƒ@ƒCƒ‹‘‚«‚İ I—¹");
+				Log.d(ITO, "ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Iï¿½ï¿½");
 				Log.d(TAG, "end recording");
 			}
 		};
@@ -232,9 +232,9 @@ public class JuliusActivity extends Activity {
 		@Override
 		protected Void doInBackground(String... params) {
 			String wavepath = params[0];
-			Log.d(ITO, "recognize() ŠJn");
+			Log.d(ITO, "recognize() start");
 			recognize(wavepath);
-			Log.d(ITO, "recognize() I—¹");
+			Log.d(ITO, "recognize() end");
 			return null;
 		}
 
