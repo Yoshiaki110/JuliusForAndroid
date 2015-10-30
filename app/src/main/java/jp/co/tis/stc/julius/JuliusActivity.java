@@ -26,7 +26,7 @@ public class JuliusActivity extends Activity {
 	private static final String TAG = "Julius JulisuActivity";
 	private static final String ITO = "ito";
 	private static final String CONTINUOUS_JCONF = "/julius/fast-android.jconf";
-///	private static final String GRAMMAR_JCONF = "/julius/demo-grammar-android.jconf";
+//	private static final String GRAMMAR_JCONF = "/julius/demo-grammar-android.jconf";
 	private static final String WAVE_PATH = "/julius/voice.wav";
 	private static final int SAMPLING_RATE = 22050;
 	
@@ -37,7 +37,7 @@ public class JuliusActivity extends Activity {
 	private native void recognize(String wavpath);
 	private native void terminateJulius();
 
-	private boolean isInitialized = false;
+	private boolean isInitialized = false;	// initJulius()に成功したらtrue
 
 	private AudioRecord audioRec = null;
 	private int bufSize = 0;
@@ -68,14 +68,15 @@ public class JuliusActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		if (isInitialized) {
-			Log.d(ITO, "terminateJulius() �J�n");
+			Log.d(ITO, "terminateJulius() 開始");
 			terminateJulius();
-			Log.d(ITO, "terminateJulius() �I��");
+			Log.d(ITO, "terminateJulius() 終了");
 			isInitialized = false;
 		}
 		super.onDestroy();
 	}
 
+	// Juliusの初期化を別スレッドで実行
 	private class JuliusInitializer extends AsyncTask<Integer, Void, Boolean> {
 		private ProgressDialog progressDialog;
 		Context context;
@@ -84,6 +85,7 @@ public class JuliusActivity extends Activity {
 			this.context = context;
 		}
 
+		// メインスレッドで実行
 		@Override
 		protected void onPreExecute() {
 			Log.d(TAG, "JuliusInitializer:onPreExecute");
@@ -93,29 +95,31 @@ public class JuliusActivity extends Activity {
 			progressDialog.show();
 		}
 
+		// メインスレッドとは別のスレッドで実行
 		@Override
 		protected Boolean doInBackground(Integer... params) {
 			if (isInitialized) {
-				Log.d(ITO, "terminateJulius() �J�n");
+				Log.d(ITO, "terminateJulius() 開始");
 				terminateJulius();
-				Log.d(ITO, "terminateJulius() �I��");
+				Log.d(ITO, "terminateJulius() 終了");
 			}
 			String conf;
 			Log.d(TAG, "JuliusInitializer:doInBackground:conf is continuous");
 			conf = CONTINUOUS_JCONF;
 
-			Log.d(ITO, "initJulius() �J�n");
+			Log.d(ITO, "initJulius() 開始");
 			if (initJulius(Environment.getExternalStorageDirectory() + conf)) {
 				Log.d(TAG, "JuliusInitializer:doInBackground:init julius success");
-				Log.d(ITO, "initJulius() �I��");
+				Log.d(ITO, "initJulius() 終了");
 				return true;
 			} else {
 				Log.e(TAG, "JuliusInitializer:doInBackground:init julius error");
-				Log.d(ITO, "initJulius() �G���[�I��");
+				Log.d(ITO, "initJulius() エラー終了");
 				return false;
 			}
 		}
 
+		// doInBackgroundメソッドの実行後にメインスレッドで実行
 		@Override
 		protected void onPostExecute(Boolean result) {
 			Log.d(TAG, "JuliusInitializer:onPostExecute");
@@ -145,10 +149,9 @@ public class JuliusActivity extends Activity {
 				resultText.setText(JuliusActivity.this.getString(R.string.init_text));
 				audioRec.startRecording();
 				writeAudioToFileThread.start();
-			}
-			else {
+			} else {
 				Log.d(TAG, "call recognize");
-				isRecording = false;
+				isRecording = false;			// レコード中のループを抜ける
 				try {
 					writeAudioToFileThread.join();
 				} catch (InterruptedException e) {
@@ -162,7 +165,7 @@ public class JuliusActivity extends Activity {
 		private final Runnable writeAudioToFile = new Runnable() {
 			@Override
 			public void run() {
-				Log.d(ITO, "�t�@�C���������� �J�n");
+				Log.d(ITO, "ファイル書き込み 開始");
 				android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 				File recFile = new File(Environment.getExternalStorageDirectory() + WAVE_PATH);
 				FileOutputStream fout = null;
@@ -206,12 +209,13 @@ public class JuliusActivity extends Activity {
 						Log.e(TAG, e.toString());
 					}
 				}
-				Log.d(ITO, "�t�@�C���������� �I��");
+				Log.d(ITO, "ファイル書き込み 終了");
 				Log.d(TAG, "end recording");
 			}
 		};
 	};
 
+	// Juliusを別スレッドで実行
 	private class JuliusRecognizer extends AsyncTask<String, Void, Void> {
 		private ProgressDialog progressDialog;
 		Context context;
@@ -226,22 +230,22 @@ public class JuliusActivity extends Activity {
 			progressDialog = new ProgressDialog(context);
 			progressDialog.setMessage(JuliusActivity.this.getString(R.string.recognizing_message));
 			progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-			progressDialog.show();
+			progressDialog.show();			// プログレスダイアログを表示する
 		}
 
 		@Override
 		protected Void doInBackground(String... params) {
 			String wavepath = params[0];
-			Log.d(ITO, "recognize() start");
+			Log.d(ITO, "recognize() 開始");
 			recognize(wavepath);
-			Log.d(ITO, "recognize() end");
+			Log.d(ITO, "recognize() 終了");
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
 			Log.d(TAG, "JuliusRecognizer:onPostExecute");
-			progressDialog.dismiss();
+			progressDialog.dismiss();		// プログレスダイアログを閉じる
 			TextView resultView = (TextView) findViewById(R.id.result_text);
 			resultView.setText(resultStr);
 			button.setText(R.string.speech);
@@ -249,6 +253,7 @@ public class JuliusActivity extends Activity {
 		}
 	}
 
+	// 使っていない
 	public void callback(byte[] result) {
 		Log.d(TAG, "callbacked");
 		StringBuilder bld = new StringBuilder();
@@ -265,3 +270,68 @@ public class JuliusActivity extends Activity {
 		Log.d(TAG, "callbacked " + resultStr);
 	}
 }
+/*
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class Test {
+	public static void main(String[] args) throws Exception {
+		Test obj = new Test();
+		obj.main();
+	}
+
+	private boolean _recording = false;
+
+	public void main() throws Exception {
+		long silent = 0L;
+		int filename = 0;
+		while (true) {
+			int n = get();
+			if (n >= 9) {
+				break;
+			}
+			if (n > 4) {
+				_recording = true;
+				silent = 0L;
+			} else {
+				if (_recording == true) {
+					long now = System.currentTimeMillis();
+					if (silent == 0L) {
+						silent = now;
+					} else {
+						if (now - silent > 5000) {
+							_recording = false;
+							silent = 0L;
+							++filename;
+							System.out.println("\t\t\tfilename:" + filename);
+						}
+					}
+				}
+			}
+			System.out.println(n + " recording:" + _recording);
+		}
+	}
+
+	public int get() throws Exception {
+		FileReader filereader = null;
+		int ret = -1;
+		try {
+			File file = new File("c:\\tmp\\test.txt");
+			filereader = new FileReader(file);
+			ret = filereader.read() - 48;
+		} catch (FileNotFoundException e) {
+			System.out.println(e);
+		} catch (IOException e) {
+			System.out.println(e);
+		} finally {
+			if (filereader != null) {
+				filereader.close();
+			}
+		}
+		return ret;
+	}
+}
+
+*/
